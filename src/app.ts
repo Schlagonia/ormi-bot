@@ -1,7 +1,7 @@
 import "core-js/stable";
 import "regenerator-runtime/runtime";
 import { ChainId, Token, WETH, Fetcher, Route, TokenAmount } from '@uniswap/sdk'
-import { useAllCommonPairs, useTradeExactIn } from './uniswap/trades.ts';
+import { useAllCommonPairs, useTradeExactIn } from './uniswap/trades';
 import { setGlobals } from './globals';
 
 import { liquidate } from './liquidation/liquidation';

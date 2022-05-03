@@ -6,9 +6,9 @@ const GAS_USED_ESTIMATE = 1000000
 const FLASH_LOAN_FEE = 0.009
 
 
-const theGraphURL_v2_kovan = 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2-kovan'
-const theGraphURL_v2_mainnet = 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2'
-const theGraphURL_v2 = APP_CHAIN_ID == ChainId.MAINNET ? theGraphURL_v2_mainnet : theGraphURL_v2_kovan
+const theGraphURL_v2_kovan = 'https://api.thegraph.com/subgraphs/name/schlagonia/ormi-finance'
+//const theGraphURL_v2_mainnet = 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2'
+const theGraphURL_v2 = theGraphURL_v2_kovan //APP_CHAIN_ID == ChainId.MAINNET ? theGraphURL_v2_mainnet : theGraphURL_v2_kovan
 const allowedLiquidation = .5 //50% of a borrowed asset can be liquidated
 const healthFactorMax = 1 //liquidation can happen when less than 1
 export var profit_threshold = .1 * (10**18) //in eth. A bonus below this will be ignored
@@ -29,7 +29,7 @@ export const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_i
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query: `
       query GET_LOANS {
-        users(first:1000, skip:${1000*count}, orderBy: id, orderDirection: desc, where: {${user_id_query}borrowedReservesCount_gt: 0}) {
+        users(first:100, skip:${100*count}, orderBy: id, orderDirection: desc, where: {${user_id_query}borrowedReservesCount_gt: 0}) {
           id
           borrowedReservesCount
           collateralReserve:reserves(where: {currentATokenBalance_gt: 0}) {
@@ -186,10 +186,10 @@ function gasCostToLiquidate(){
 }
 // percent is represented as a number less than 0 ie .75 is equivalent to 75%
 // multiply base and percent and return a BigInt
-function percentBigInt(base:BigInt,percent:decimal):BigInt {
+function percentBigInt(base,percent) {
   return BigInt(base * BigInt(percent * 10000) / 10000n)
 }
-function showPath(trade:Trade){
+function showPath(trade){
   var pathSymbol=""
   var pathAddress= []
   trade.route.path.map(async (token) => {
