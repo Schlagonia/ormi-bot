@@ -1,47 +1,48 @@
-import { isTradeBetter } from './utils/trades'
-import { ChainId, Currency, CurrencyAmount, Pair, Token, Trade } from '@uniswap/sdk'
-import flatMap from 'lodash.flatmap'
+const { isTradeBetter } = require('./utils/trades.js')
+const { Pair, Trade } = require('@uniswap/sdk')
+const flatMap = require('lodash.flatmap')
 
-import { BASES_TO_CHECK_TRADES_AGAINST, CUSTOM_BASES, BETTER_TRADE_LESS_HOPS_THRESHOLD } from './constants'
-import { PairState, usePairs } from './data/Reserves'
-import { wrappedCurrency } from './utils/wrappedCurrency'
+const { BASES_TO_CHECK_TRADES_AGAINST, CUSTOM_BASES, BETTER_TRADE_LESS_HOPS_THRESHOLD } = require('./constants/index.js')
+const { usePairs } = require('./data/Reserves.js')
+const { wrappedCurrency } = require('./utils/wrappedCurrency.js')
 
-//import { useUnsupportedTokens } from './Tokens'
+//const { useUnsupportedTokens } = require( './Tokens')
 
-export async function useAllCommonPairs(token1?: Token, token2?: Token): Pair[] {
-  const chainId = token1.chainId && token2.chainId  && token1.chainId == token2.chainId ? token1.chainId : undefined
-
-  const bases: Token[] = chainId ? BASES_TO_CHECK_TRADES_AGAINST[chainId] : []
-
+const useAllCommonPairs = async function useAllCommonPairs(token1, token2){
+  const chainId = token1.chainId && token2.chainId  && token1.chainId == token2.chainId ? token1.chainId : null
+  //console.log('Chain Id ', chainId)
+  const bases = chainId ? BASES_TO_CHECK_TRADES_AGAINST[chainId] : []
+  //console.log("Bases ", bases)
   const [tokenA, tokenB] = chainId
-    ? [wrappedCurrency(token1), wrappedCurrency(token2)]
+    ? [wrappedCurrency(token1, chainId), wrappedCurrency(token2, chainId)]
     : [undefined, undefined]
 
-  const basePairs: [Token, Token][] =
-      flatMap(bases, (base): [Token, Token][] => bases.map(otherBase => [base, otherBase])).filter(
+  const basePairs =
+      flatMap(bases, (base) => bases.map(otherBase => [base, otherBase])).filter(
         ([t0, t1]) => t0.address !== t1.address
       )
-  const allPairCombinations: [Token, Token][] =
+  //console.log("BasePairs: ", basePairs)
+  const allPairCombinations =
     tokenA && tokenB
       ? [
           // the direct pair
           [tokenA, tokenB],
           // token A against all bases
-          ...bases.map((base): [Token, Token] => [tokenA, base]),
+          ...bases.map((base) => [tokenA, base]),
           // token B against all bases
-          ...bases.map((base): [Token, Token] => [tokenB, base]),
+          ...bases.map((base) => [tokenB, base]),
           // each base against all bases
           ...basePairs
         ]
-          .filter((tokens): tokens is [Token, Token] => Boolean(tokens[0] && tokens[1]))
+          .filter((tokens) => Boolean(tokens[0] && tokens[1]))
           .filter(([t0, t1]) => t0.address !== t1.address)
           .filter(([tokenA, tokenB]) => {
             if (!chainId) return true
             const customBases = CUSTOM_BASES[chainId]
             if (!customBases) return true
 
-            const customBasesA: Token[] | undefined = customBases[tokenA.address]
-            const customBasesB: Token[] | undefined = customBases[tokenB.address]
+            const customBasesA = customBases[tokenA.address]
+            const customBasesB = customBases[tokenB.address]
 
             if (!customBasesA && !customBasesB) return true
 
@@ -51,14 +52,14 @@ export async function useAllCommonPairs(token1?: Token, token2?: Token): Pair[] 
             return true
           })
       : []
-
-  const allPairs = await usePairs(allPairCombinations)
-
+  //console.log("All Pair Cimbinations ", allPairCombinations)
+  const allPairs = await usePairs(allPairCombinations, chainId)
+  //console.log('All pairs ', allPairs)
   // only pass along valid pairs, non-duplicated pairs
   return Object.values(
       allPairs
         // filter out duplicated pairs
-        .reduce<{ [pairAddress: string]: Pair }>((memo, curr) => {
+        .reduce((memo, curr) => {
           memo[curr.liquidityToken.address] = memo[curr.liquidityToken.address] ?? curr
           return memo
         }, {})
@@ -70,8 +71,8 @@ const MAX_HOPS = 3
 /**
  * Returns the best trade for the exact amount of tokens in to the given token out
  */
-export async function useTradeExactIn(tokenAmountIn?: TokenAmount, tokenOut?: Token): Trade | null {
-  const allowedPairs = await useAllCommonPairs(tokenAmountIn?.currency, tokenOut)
+const useTradeExactIn = async function useTradeExactIn(tokenAmountIn, tokenIn, tokenOut) {
+  const allowedPairs = await useAllCommonPairs(tokenIn, tokenOut)
   //console.log(`allowed pairs ${JSON.stringify(allowedPairs,null,2)}`)
 
   const singleHopOnly = false
@@ -83,9 +84,9 @@ export async function useTradeExactIn(tokenAmountIn?: TokenAmount, tokenOut?: To
       )
     }
     // search through trades with varying hops, find best trade out of them
-    let bestTradeSoFar: Trade | null = null
+    let bestTradeSoFar;
     for (let i = 1; i <= MAX_HOPS; i++) {
-      const currentTrade: Trade | null =
+      const currentTrade =
         Trade.bestTradeExactIn(allowedPairs, tokenAmountIn, tokenOut, { maxHops: i, maxNumResults: 1 })[0] ??
         null
       // if current trade is best yet, save it
@@ -102,26 +103,40 @@ export async function useTradeExactIn(tokenAmountIn?: TokenAmount, tokenOut?: To
   return null
 }
 
+function getTokenOutPath(_tokenIn, _tokenOut) {
+  isBase = _tokenIn == 'WETH' || _tokenOut == 'WETH';
+  _path = []
+  _path[0] = _tokenIn;
+
+  if (isBase) {
+      _path[1] = _tokenOut;
+  } else {
+      _path[1] = 'WETH';
+      _path[2] = _tokenOut;
+  }
+  
+}
+
 /**
  * Returns the best trade for the token in to the exact amount of token out
  */
-export function useTradeExactOut(tokenIn?: Token, tokenAmountOut?: TokenAmount): Trade | null {
-  const allowedPairs = useAllCommonPairs(tokenIn, tokenAmountOut?.currency)
+const useTradeExactOut = async function useTradeExactOut(tokenIn, tokenAmountOut) {
+  const allowedPairs = useAllCommonPairs(tokenIn, tokenAmountOut.token)
 
   const singleHopOnly = false
 
-    if (tokenIn && tokenAmountOut && allowedPairs.length > 0) {
+    if (tokenIn && tokenAmountOut && (await allowedPairs).length > 0) {
       if (singleHopOnly) {
         return (
-          Trade.bestTradeExactOut(allowedPairs, tokenIn, tokenAmountOut, { maxHops: 1, maxNumResults: 1 })[0] ??
+          Trade.bestTradeExactOut(await allowedPairs, tokenIn, tokenAmountOut, { maxHops: 1, maxNumResults: 1 })[0] ??
           null
         )
       }
       // search through trades with varying hops, find best trade out of them
-      let bestTradeSoFar: Trade | null = null
+      let bestTradeSoFar;
       for (let i = 1; i <= MAX_HOPS; i++) {
         const currentTrade =
-          Trade.bestTradeExactOut(allowedPairs, tokenIn, tokenAmountOut, { maxHops: i, maxNumResults: 1 })[0] ??
+          Trade.bestTradeExactOut(await allowedPairs, tokenIn, tokenAmountOut, { maxHops: i, maxNumResults: 1 })[0] ??
           null
         if (isTradeBetter(bestTradeSoFar, currentTrade, BETTER_TRADE_LESS_HOPS_THRESHOLD)) {
           bestTradeSoFar = currentTrade
@@ -131,6 +146,9 @@ export function useTradeExactOut(tokenIn?: Token, tokenAmountOut?: TokenAmount):
     }
     return null
 }
+
+module.exports = { useTradeExactOut, useTradeExactIn, useAllCommonPairs, getTokenOutPath };
+
 //given a path, calculate swap price
 //todo this function needs to be completed or deleted. Not currently funcioning right
 /*

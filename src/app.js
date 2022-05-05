@@ -1,14 +1,18 @@
-import "core-js/stable";
+/*import "core-js/stable";
 import "regenerator-runtime/runtime";
 import { ChainId, Token, WETH, Fetcher, Route, TokenAmount } from '@uniswap/sdk'
 import { useAllCommonPairs, useTradeExactIn } from './uniswap/trades';
 import { setGlobals } from './globals';
 
 import { liquidate } from './liquidation/liquidation';
-import { getGas,gas_cost } from './utils/gas'
-import { fetchV2UnhealthyLoans } from './v2liquidation';
-require('isomorphic-fetch');
 
+require('isomorphic-fetch');
+*/
+const { fetchV2UnhealthyLoans } = require('./v2liquidation.js');
+const { getGas, gas_cost } = require('./utils/gas')
+
+//import { getGas,gas_cost } from './utils/gas'
+//import { fetchV2UnhealthyLoans } from './v2liquidation';
 /*
 This is a place holder for implementing the liquidation call which would fully automate this bot
 require('dotenv').config()

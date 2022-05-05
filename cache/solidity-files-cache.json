@@ -1,0 +1,235 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\brad\\ormi-bot\\contracts\\FlashLoanReceiverBase.sol": {
+      "lastModificationDate": 1651682433668,
+      "contentHash": "0a8753b3f0a6096de48a685c79906904",
+      "sourceName": "contracts/FlashLoanReceiverBase.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Interfaces.sol",
+        "./Libraries.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.12"
+      ],
+      "artifacts": [
+        "FlashLoanReceiverBase"
+      ]
+    },
+    "C:\\Users\\brad\\ormi-bot\\contracts\\Interfaces.sol": {
+      "lastModificationDate": 1651679718217,
+      "contentHash": "514f735b227fa5356cf7098215c10cea",
+      "sourceName": "contracts/Interfaces.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Libraries.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.12"
+      ],
+      "artifacts": [
+        "IERC20",
+        "IFlashLoanReceiver",
+        "ILendingPool",
+        "ILendingPoolAddressesProvider"
+      ]
+    },
+    "C:\\Users\\brad\\ormi-bot\\contracts\\Libraries.sol": {
+      "lastModificationDate": 1651679741559,
+      "contentHash": "45ed7d543db4c64c949358da6a31af64",
+      "sourceName": "contracts/Libraries.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./Interfaces.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.12"
+      ],
+      "artifacts": [
+        "Address",
+        "DataTypes",
+        "SafeERC20",
+        "SafeMath"
+      ]
+    },
+    "C:\\Users\\brad\\ormi-bot\\contracts\\LiquidateLoan.sol": {
+      "lastModificationDate": 1651682577659,
+      "contentHash": "23c19bcec1bd8afe8d0a8308655ebc51",
+      "sourceName": "contracts/LiquidateLoan.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./FlashLoanReceiverBase.sol",
+        "./Interfaces.sol",
+        "./Libraries.sol",
+        "./Ownable.sol",
+        "./IUniswapV2Router.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.12"
+      ],
+      "artifacts": [
+        "LiquidateLoan"
+      ]
+    },
+    "C:\\Users\\brad\\ormi-bot\\contracts\\Ownable.sol": {
+      "lastModificationDate": 1651679760732,
+      "contentHash": "38b9d69390b62fcd0f0fb34a3916254a",
+      "sourceName": "contracts/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.12"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "C:\\Users\\brad\\ormi-bot\\contracts\\IUniswapV2Router.sol": {
+      "lastModificationDate": 1651679840671,
+      "contentHash": "2c2bbd8fe5e18dedc2ade2e49c0ac81e",
+      "sourceName": "contracts/IUniswapV2Router.sol",
+      "solcConfig": {
+        "version": "0.8.10",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.0"
+      ],
+      "artifacts": [
+        "IUniswapV2Router01",
+        "IUniswapV2Router02"
+      ]
+    }
+  }
+}

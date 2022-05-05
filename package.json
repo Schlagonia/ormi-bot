@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rm -rf lib && mkdir lib",
     "build": "npm run clean && babel src --out-dir lib --extensions '.ts,.tsx'",
-    "start": "babel-node --extensions '.ts' src/app.ts",
+    "start": "babel-node --extensions '.ts' src/app.js",
     "start-prod": "NODE_ENV=production node ./lib/app.js > app.log 2>&1",
     "test": "mocha --require @babel/register --require babel-polyfill './test'",
     "check-types": "tsc"
@@ -17,12 +17,13 @@
   "dependencies": {
     "@ethersproject/address": "^5.0.10",
     "@ethersproject/solidity": "^5.0.9",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@uniswap/sdk": "^3.0.3",
     "dotenv": "^8.2.0",
     "ethereum-input-data-decoder": "^0.3.1",
-    "ethers": "^5.0.31",
     "isomorphic-fetch": "^3.0.0",
     "lodash.flatmap": "^4.5.0",
+    "node-fetch": "^2.6.7",
     "web3": "^1.3.4"
   },
   "devDependencies": {
@@ -34,8 +35,14 @@
     "@babel/preset-env": "^7.12.16",
     "@babel/preset-typescript": "^7.12.16",
     "@babel/register": "^7.12.13",
+    "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-waffle": "^2.0.3",
+    "@types/lodash.flatmap": "^4.5.7",
     "babel-polyfill": "^6.26.0",
-    "chai": "^4.3.0",
+    "chai": "^4.3.6",
+    "ethereum-waffle": "^3.4.4",
+    "ethers": "^5.6.5",
+    "hardhat": "^2.9.3",
     "mocha": "^7.2.0",
     "typescript": "^4.1.5"
   }

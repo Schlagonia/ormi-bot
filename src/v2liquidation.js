@@ -1,35 +1,39 @@
-import { TOKEN_LIST, APP_CHAIN_ID } from './constants';
-import { ChainId, Token, TokenAmount } from '@uniswap/sdk'
-import { useTradeExactIn } from './uniswap/trades';
-import { gas_cost } from './utils/gas'
+const { liquidateALoan } = require("./liquidation/liquidateLoan.js");
+const { TOKEN_LIST } = require('./constants/index.js');
+const { ChainId, Token, TokenAmount } = require('@uniswap/sdk')
+const { useTradeExactIn } = require('./uniswap/trades.js');
+const { gas_cost } = require('./utils/gas.js')
+const fetch = require("node-fetch");
 const GAS_USED_ESTIMATE = 1000000
 const FLASH_LOAN_FEE = 0.009
 
 
 const theGraphURL_v2_kovan = 'https://api.thegraph.com/subgraphs/name/schlagonia/ormi-finance'
+const theGraphAave ='https://api.thegraph.com/subgraphs/name/aave/protocol-v2-kovan'
 //const theGraphURL_v2_mainnet = 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2'
-const theGraphURL_v2 = theGraphURL_v2_kovan //APP_CHAIN_ID == ChainId.MAINNET ? theGraphURL_v2_mainnet : theGraphURL_v2_kovan
+const theGraphURL_v2 = theGraphAave //APP_CHAIN_ID == ChainId.MAINNET ? theGraphURL_v2_mainnet : theGraphURL_v2_kovan
 const allowedLiquidation = .5 //50% of a borrowed asset can be liquidated
 const healthFactorMax = 1 //liquidation can happen when less than 1
-export var profit_threshold = .1 * (10**18) //in eth. A bonus below this will be ignored
+const profit_threshold = .1 * (10**16) //in eth. A bonus below this will be ignored
 
-export const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_id){
-  var count=0;
-  var maxCount=6
-  var user_id_query=""
+const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_id){
+  var count = 0;
+  var maxCount = 6;
+  var user_id_query = "";
 
-  if(user_id){
-    user_id_query = `id: "${user_id}",`
-    maxCount = 1
+  if (user_id) {
+    user_id_query = `id: "${user_id}",`;
+    maxCount = 1;
   }
-  console.log(`${Date().toLocaleString()} fetching unhealthy loans}`)
-  while(count < maxCount){
-  fetch(theGraphURL_v2, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query: `
+  console.log(`${Date().toLocaleString()} fetching unhealthy loans}`);
+  while (count < maxCount) {
+    fetch(theGraphURL_v2, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `
       query GET_LOANS {
-        users(first:100, skip:${100*count}, orderBy: id, orderDirection: desc, where: {${user_id_query}borrowedReservesCount_gt: 0}) {
+        users(first:10, skip:${10 * count}, orderBy: id, orderDirection: desc, where: {${user_id_query}borrowedReservesCount_gt: 0}) {
           id
           borrowedReservesCount
           collateralReserve:reserves(where: {currentATokenBalance_gt: 0}) {
@@ -65,16 +69,19 @@ export const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_i
           }
         }
       }`
-    }),
-  })
-  .then(res => res.json())
-  .then(res => {
-    const total_loans = res.data.users.length
-    const unhealthyLoans=parseUsers(res.data);
-    if(unhealthyLoans.length>0) liquidationProfits(unhealthyLoans)
-    if(total_loans>0) console.log(`Records:${total_loans} Unhealthy:${unhealthyLoans.length}`)
-  });
-  count++;
+      }),
+    })
+      .then(res => res.json())
+      .then(res => {
+        const total_loans = res.data.users.length;
+        if(total_loans.length = 0) return;
+        const unhealthyLoans = parseUsers(res.data);
+        if (unhealthyLoans.length > 0)
+          liquidationProfits(unhealthyLoans);
+        if (total_loans > 0)
+          console.log(`Records:${total_loans} Unhealthy:${unhealthyLoans.length}`);
+      });
+    count++;
   }
 }
 
@@ -114,6 +121,7 @@ function parseUsers(payload) {
     var healthFactor= totalCollateralThreshold / totalBorrowed;
 
     if (healthFactor<=healthFactorMax) {
+      console.log("Found Unhealthy loan for user: ", user.id)
       loans.push( {
           "user_id"  :  user.id,
           "healthFactor"   :  healthFactor,
@@ -124,6 +132,8 @@ function parseUsers(payload) {
           "max_collateralBonus" : max_collateralBonus/10000,
           "max_collateralPriceInEth" : max_collateralPriceInEth
         })
+    } else {
+      console.log("User: ", user.id, " has a healthy loan")
     }
   });
 
@@ -147,7 +157,7 @@ async function liquidationProfit(loan){
   var flashLoanAmountInEth_plusBonus = percentBigInt(flashLoanAmountInEth,loan.max_collateralBonus) //add the bonus
   var collateralTokensFromPayout  = flashLoanAmountInEth_plusBonus * BigInt(10 ** TOKEN_LIST[loan.max_collateralSymbol].decimals) / BigInt(loan.max_collateralPriceInEth) //this is the amount of tokens that will be received as payment for liquidation and then will need to be swapped back to token of the flashloan
   var fromTokenAmount = new TokenAmount(TOKEN_LIST[loan.max_collateralSymbol], collateralTokensFromPayout)// this is the number of coins to trade (should have many 0's)
-  var bestTrade = await useTradeExactIn(fromTokenAmount,TOKEN_LIST[loan.max_borrowedSymbol])
+  var bestTrade = await useTradeExactIn(fromTokenAmount, TOKEN_LIST[loan.max_collateralSymbol], TOKEN_LIST[loan.max_borrowedSymbol])
 
   var minimumTokensAfterSwap = bestTrade ? (BigInt(bestTrade.outputAmount.numerator) * BigInt(10 ** TOKEN_LIST[loan.max_borrowedSymbol].decimals)) / BigInt(bestTrade.outputAmount.denominator) : BigInt(0)
 
@@ -158,8 +168,9 @@ async function liquidationProfit(loan){
   var profitInEth = profitInBorrowCurrency * BigInt(loan.max_borrowedPriceInEth) / BigInt(10 ** TOKEN_LIST[loan.max_borrowedSymbol].decimals)
   var profitInEthAfterGas = (profitInEth)  - gasFee
 
-  if (profitInEthAfterGas>0.1)
-  {
+  console.log("Profit in ETH: ", profitInEth)
+  console.log("Profit in ETH after gas: ", profitInEthAfterGas)
+  
     console.log("-------------------------------")
     console.log(`user_ID:${loan.user_id}`)
     console.log(`HealthFactor ${loan.healthFactor.toFixed(2)}`)
@@ -172,12 +183,12 @@ async function liquidationProfit(loan){
     console.log(`flashLoanPlusCost ${flashLoanPlusCost}`)
     console.log(`gasFee ${gasFee}`)
     console.log(`profitInEthAfterGas ${Number(profitInEthAfterGas)/(10 ** 18)}eth`)
+  if (profitInEthAfterGas>0)
+  {
+    liquidateALoan(loan, flashLoanAmount, minimumTokensAfterSwap, bestTrade.route)
   }
     //console.log(`user_ID:${loan.user_id} HealthFactor ${loan.healthFactor.toFixed(2)} allowedLiquidation ${flashLoanAmount.toFixed(2)} ${loan.max_collateralSymbol}->${loan.max_borrowedSymbol}` )
     //console.log(`minimumTokensAfterSwap ${minimumTokensAfterSwap} flashLoanCost ${flashLoanCost} gasFee ${gasFee} profit ${profit.toFixed(2)}`)
-
-
-
 
 }
 //returned value is in eth
@@ -187,7 +198,7 @@ function gasCostToLiquidate(){
 // percent is represented as a number less than 0 ie .75 is equivalent to 75%
 // multiply base and percent and return a BigInt
 function percentBigInt(base,percent) {
-  return BigInt(base * BigInt(percent * 10000) / 10000n)
+  return BigInt(BigInt(base) * BigInt(percent * 10000) / BigInt(10000))
 }
 function showPath(trade){
   var pathSymbol=""
@@ -200,3 +211,5 @@ function showPath(trade){
   console.log(`${pathSymbol} ${JSON.stringify(pathAddress)}`)
   return [pathSymbol,pathAddress]
 }
+
+module.exports = { fetchV2UnhealthyLoans, profit_threshold}

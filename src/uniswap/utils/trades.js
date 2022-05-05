@@ -1,12 +1,12 @@
-import { ZERO_PERCENT, ONE_HUNDRED_PERCENT } from '../constants/index'
-import { Trade, Percent, currencyEquals } from '@uniswap/sdk'
+const { ZERO_PERCENT, ONE_HUNDRED_PERCENT } = require('../constants/index.js')
+const { Trade, Percent, currencyEquals } = require('@uniswap/sdk')
 
 // returns whether tradeB is better than tradeA by at least a threshold percentage amount
-export function isTradeBetter(
-  tradeA: Trade | undefined | null,
-  tradeB: Trade | undefined | null,
-  minimumDelta: Percent = ZERO_PERCENT
-): boolean | undefined {
+function isTradeBetter(
+  tradeA,
+  tradeB,
+  minimumDelta = ZERO_PERCENT
+){
   if (tradeA && !tradeB) return false
   if (tradeB && !tradeA) return true
   if (!tradeA || !tradeB) return undefined
@@ -25,3 +25,5 @@ export function isTradeBetter(
     return tradeA.executionPrice.raw.multiply(minimumDelta.add(ONE_HUNDRED_PERCENT)).lessThan(tradeB.executionPrice)
   }
 }
+
+module.exports = {isTradeBetter}

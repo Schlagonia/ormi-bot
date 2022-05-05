@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity >=0.6.12;
 
-import {IFlashLoanReceiver, ILendingPoolAddressesProvider, ILendingPool, IERC20  } from "Interfaces.sol";
-import { SafeERC20, SafeMath } from "Libraries.sol";
+import {IFlashLoanReceiver, ILendingPoolAddressesProvider, ILendingPool, IERC20  } from "./Interfaces.sol";
+import { SafeERC20, SafeMath } from "./Libraries.sol";
 
 abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
   using SafeERC20 for IERC20;
@@ -11,7 +11,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
   ILendingPoolAddressesProvider internal _addressesProvider;
   ILendingPool internal _lendingPool;
 
-  constructor(ILendingPoolAddressesProvider provider) public {
+  constructor(ILendingPoolAddressesProvider provider) {
     _addressesProvider = provider;
     _lendingPool = ILendingPool(ILendingPoolAddressesProvider(provider).getLendingPool());
   }

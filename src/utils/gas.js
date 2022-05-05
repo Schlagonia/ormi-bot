@@ -1,8 +1,10 @@
 
-export let gas_cost=0;
+const fetch = require("node-fetch");
+
+let gas_cost=0;
 //returns gas for rapid time (within 15s)
 //https://www.gasnow.org/
-export const getGas = async function(){
+const getGas = async function(){
   fetch("https://www.gasnow.org/api/v3/gas/price?utm_source=85734", {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' }
@@ -15,3 +17,5 @@ export const getGas = async function(){
     console.error('Error:', error);
   });
 }
+
+module.exports = { gas_cost, getGas}

@@ -1,6 +1,8 @@
-import { ChainId, JSBI, Percent, Token } from '@uniswap/sdk'
+const { ChainId, JSBI, Percent, Token } = require('@uniswap/sdk')
 
-export const APP_CHAIN_ID = ChainId.MAINNET
+const APP_CHAIN_ID = ChainId.MAINNET
+
+const liquidatorAddress = '0x7CA3533365b429c0dcDa89C7b2710A885CB6745F'
 
 const token_list_mainnet=
 {
@@ -63,4 +65,6 @@ const token_list =
     [ChainId.MAINNET] : token_list_mainnet,
     [ChainId.KOVAN] : token_list_kovan,
   }
-export const TOKEN_LIST = token_list[APP_CHAIN_ID]
+const TOKEN_LIST = token_list_kovan  //token_list[APP_CHAIN_ID]
+
+module.exports = { TOKEN_LIST, liquidatorAddress}

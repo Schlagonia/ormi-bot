@@ -1,14 +1,15 @@
-import { ChainId, TokenAmount, Pair, Currency, Fetcher } from '@uniswap/sdk'
-import { wrappedCurrency } from '../utils/wrappedCurrency'
+const { ChainId, TokenAmount, Pair, Currency, Fetcher } = require( '@uniswap/sdk')
+const { wrappedCurrency } = require( '../utils/wrappedCurrency.js')
 var providers = require('ethers').providers;
+/*
 export enum PairState {
   LOADING,
   NOT_EXISTS,
   EXISTS,
   INVALID
 }
-
-export async function usePairs(currencies: [Currency | undefined, Currency | undefined][], chainId : ChainId): Pair[] {
+*/
+const usePairs = async function usePairs(currencies, chainId ) {
 
 //convert to to wrapped tokens where needed
   const tokens =
@@ -24,11 +25,11 @@ export async function usePairs(currencies: [Currency | undefined, Currency | und
   return reserves_cleansed
 }
 
-export async function usePair(tokenA?: Currency, tokenB?: Currency): Pair[] {
+const usePair = async function usePair(tokenA, tokenB) {
   return usePairs([[tokenA, tokenB]])[0]
 }
 
-async function getReserves(tokens:[Token,Token][]): Pair[] {
+async function getReserves(tokens){
   const results = await Promise.all(tokens.map(async([tokenA, tokenB]) => {
     if (tokenA && tokenB && tokenA.equals(tokenB)){
       return
@@ -45,3 +46,5 @@ async function getReserves(tokens:[Token,Token][]): Pair[] {
 )
   return results
 }
+
+module.exports = { usePair, usePairs, }

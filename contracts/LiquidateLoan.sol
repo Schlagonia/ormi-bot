@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity >=0.6.12;
 
-import { FlashLoanReceiverBase } from "FlashLoanReceiverBase.sol";
-import { ILendingPool, ILendingPoolAddressesProvider, IERC20 } from "Interfaces.sol";
-import { SafeMath } from "Libraries.sol";
+import { FlashLoanReceiverBase } from "./FlashLoanReceiverBase.sol";
+import { ILendingPool, ILendingPoolAddressesProvider, IERC20 } from "./Interfaces.sol";
+import { SafeMath } from "./Libraries.sol";
 import "./Ownable.sol";
-
-import "https://github.com/sushiswap/sushiswap/blob/master/contracts/uniswapv2/interfaces/IUniswapV2Router02.sol";
+import { IUniswapV2Router02 } from './IUniswapV2Router.sol';
 
 /*
 * A contract that liquidates an aave loan using a flash loan:
@@ -26,7 +25,7 @@ contract LiquidateLoan is FlashLoanReceiverBase, Ownable {
     event ErrorHandled(string stringFailure);
 
     // intantiate lending pool addresses provider and get lending pool address
-    constructor(ILendingPoolAddressesProvider _addressProvider, IUniswapV2Router02 _uniswapV2Router) FlashLoanReceiverBase(_addressProvider) public {
+    constructor(ILendingPoolAddressesProvider _addressProvider, IUniswapV2Router02 _uniswapV2Router) FlashLoanReceiverBase(_addressProvider) {
         provider = _addressProvider;
         lendingPoolAddr = provider.getLendingPool();
 
@@ -60,7 +59,7 @@ contract LiquidateLoan is FlashLoanReceiverBase, Ownable {
         liquidateLoan(collateral, assets[0], userToLiquidate, amounts[0], false);
 
         //swap collateral from liquidate back to asset from flashloan to pay it off
-        swapToBarrowedAsset(collateral,assets[0],amountOutMin, swapPath);
+        swapToBorrowedAsset(collateral,amountOutMin, swapPath);
 
         //Pay to owner the balance after fees
         uint256 profit = calcProfits(IERC20(assets[0]).balanceOf(address(this)),amounts[0],premiums[0]);
@@ -95,7 +94,7 @@ contract LiquidateLoan is FlashLoanReceiverBase, Ownable {
 
 
     //assumes the balance of the token is on the contract
-    function swapToBarrowedAsset(address asset_from, address asset_to, uint amountOutMin, address[] memory swapPath ) public {
+    function swapToBorrowedAsset(address asset_from, uint amountOutMin, address[] memory swapPath ) public {
         
         IERC20 asset_fromToken;
         uint256 amountToTrade;
