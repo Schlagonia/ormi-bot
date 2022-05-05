@@ -17,7 +17,7 @@ const healthFactorMax = 1 //liquidation can happen when less than 1
 const profit_threshold = .1 * (10**16) //in eth. A bonus below this will be ignored
 
 const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_id){
-  var count = 0;
+  var count = 1;
   var maxCount = 6;
   var user_id_query = "";
 
@@ -185,7 +185,7 @@ async function liquidationProfit(loan){
     console.log(`profitInEthAfterGas ${Number(profitInEthAfterGas)/(10 ** 18)}eth`)
   if (profitInEthAfterGas>0)
   {
-    liquidateALoan(loan, flashLoanAmount, minimumTokensAfterSwap, bestTrade.route)
+    await liquidateALoan(loan, flashLoanAmount, minimumTokensAfterSwap, showPath(bestTrade))
   }
     //console.log(`user_ID:${loan.user_id} HealthFactor ${loan.healthFactor.toFixed(2)} allowedLiquidation ${flashLoanAmount.toFixed(2)} ${loan.max_collateralSymbol}->${loan.max_borrowedSymbol}` )
     //console.log(`minimumTokensAfterSwap ${minimumTokensAfterSwap} flashLoanCost ${flashLoanCost} gasFee ${gasFee} profit ${profit.toFixed(2)}`)

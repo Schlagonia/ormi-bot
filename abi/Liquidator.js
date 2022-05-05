@@ -1,6 +1,5 @@
-{
-    "name": "Liquidator",
-    "abi" :[
+
+    abi = [
     {
         "inputs": [
             {
@@ -233,4 +232,6 @@
         "type": "receive"
     }
 ]
-}
+
+module.exports = {abi}
+

@@ -16,7 +16,7 @@ async function main() {
 
   const Liquidator = await ethers.getContractFactory('LiquidateLoan')
   const liquidator = await Liquidator.deploy(
-    '0x97aFAEf9409cB92B8440A6Ef964EC46fC238E230', //address provider
+    '0x88757f2f99175387aB4C6a4b3067c77A695b0349', //address provider
     '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D' //Uni v2 router
   )
   await liquidator.deployed()

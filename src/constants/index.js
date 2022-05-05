@@ -2,7 +2,8 @@ const { ChainId, JSBI, Percent, Token } = require('@uniswap/sdk')
 
 const APP_CHAIN_ID = ChainId.MAINNET
 
-const liquidatorAddress = '0x7CA3533365b429c0dcDa89C7b2710A885CB6745F'
+const ormiLiquidatorAddress = '0x7CA3533365b429c0dcDa89C7b2710A885CB6745F'
+const aaveLiquidatorAddress = '0xC71f58a717e15426662009407F4B10F0168CAadc'
 
 const token_list_mainnet=
 {
@@ -67,4 +68,4 @@ const token_list =
   }
 const TOKEN_LIST = token_list_kovan  //token_list[APP_CHAIN_ID]
 
-module.exports = { TOKEN_LIST, liquidatorAddress}
+module.exports = { TOKEN_LIST, ormiLiquidatorAddress, aaveLiquidatorAddress }

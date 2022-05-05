@@ -11,4 +11,8 @@ const setGlobals = () => {
     return global;
 }
 
-module.exports = {setGlobals}
+const provider = new ethers.providers.JsonRpcProvider(networks.kovan.url)
+
+const signer = new ethers.Wallet(process.env.PRIV_KEY, provider)
+
+module.exports = { provider, signer }

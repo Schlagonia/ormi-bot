@@ -120,8 +120,8 @@
       ]
     },
     "C:\\Users\\brad\\ormi-bot\\contracts\\LiquidateLoan.sol": {
-      "lastModificationDate": 1651682577659,
-      "contentHash": "23c19bcec1bd8afe8d0a8308655ebc51",
+      "lastModificationDate": 1651767658618,
+      "contentHash": "b0ff4c4e96baa229b17f6cdccc1d330e",
       "sourceName": "contracts/LiquidateLoan.sol",
       "solcConfig": {
         "version": "0.8.10",
