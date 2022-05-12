@@ -1,4 +1,4 @@
-# Aave Liquidation Bot
+# Ormi Liquidation Bot
 * This bot will check for unhealthy loans using TheGraph
 * Calculate profits
 * Output details of unhealthy loan if its profitable to liquidate
@@ -7,11 +7,6 @@
 ## Solidity Contract
 * All contracts can be found in `/contracts`
 * Can be deployed to Kovan for testing or MAINNET
-
-# To Do
-* Currently this script is not setup to call the contract, it must be done manually.
-* Remaining task is to automate the liquidation. This shouldn't be hard to do since the contract is already in place.
-
 
 # To get started
 1. Install dependencies

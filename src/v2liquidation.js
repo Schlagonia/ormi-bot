@@ -2,24 +2,26 @@ const { liquidateALoan } = require("./liquidation/liquidateLoan.js");
 const { TOKEN_LIST } = require('./constants/index.js');
 const { ChainId, Token, TokenAmount } = require('@uniswap/sdk')
 const { useTradeExactIn } = require('./uniswap/trades.js');
-const { gas_cost } = require('./utils/gas.js')
+let { getGasPrice } = require('./utils/gas.js')
 const fetch = require("node-fetch");
-const GAS_USED_ESTIMATE = 1000000
+const GAS_LIMIT_ESTIMATE = 600000
+let GAS_PRICE = 0;
 const FLASH_LOAN_FEE = 0.009
 
 
-const theGraphURL_v2_kovan = 'https://api.thegraph.com/subgraphs/name/schlagonia/ormi-finance'
+const theGraphOrmi = 'https://api.thegraph.com/subgraphs/name/schlagonia/ormi-finance'
 const theGraphAave ='https://api.thegraph.com/subgraphs/name/aave/protocol-v2-kovan'
-//const theGraphURL_v2_mainnet = 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2'
-const theGraphURL_v2 = theGraphAave //APP_CHAIN_ID == ChainId.MAINNET ? theGraphURL_v2_mainnet : theGraphURL_v2_kovan
+const theGraphURL_v2_mainnet = 'https://api.thegraph.com/subgraphs/name/aave/protocol-v2'
+const theGraphURL_v2 =  theGraphOrmi//APP_CHAIN_ID == ChainId.MAINNET ? theGraphURL_v2_mainnet : theGraphURL_v2_kovan
 const allowedLiquidation = .5 //50% of a borrowed asset can be liquidated
 const healthFactorMax = 1 //liquidation can happen when less than 1
 const profit_threshold = .1 * (10**16) //in eth. A bonus below this will be ignored
 
 const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_id){
-  var count = 1;
+  var count = 0;
   var maxCount = 6;
   var user_id_query = "";
+  GAS_PRICE = await getGasPrice()
 
   if (user_id) {
     user_id_query = `id: "${user_id}",`;
@@ -33,7 +35,7 @@ const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_id){
       body: JSON.stringify({
         query: `
       query GET_LOANS {
-        users(first:10, skip:${10 * count}, orderBy: id, orderDirection: desc, where: {${user_id_query}borrowedReservesCount_gt: 0}) {
+        users(first:10, skip:${10 * count}, orderBy: id, orderDirection: desc, where: {borrowedReservesCount_gt: 0}) {
           id
           borrowedReservesCount
           collateralReserve:reserves(where: {currentATokenBalance_gt: 0}) {
@@ -74,7 +76,6 @@ const fetchV2UnhealthyLoans = async function fetchV2UnhealthyLoans(user_id){
       .then(res => res.json())
       .then(res => {
         const total_loans = res.data.users.length;
-        if(total_loans.length = 0) return;
         const unhealthyLoans = parseUsers(res.data);
         if (unhealthyLoans.length > 0)
           liquidationProfits(unhealthyLoans);
@@ -138,7 +139,7 @@ function parseUsers(payload) {
   });
 
   //filter out loans under a threshold that we know will not be profitable (liquidation_threshold)
-  loans = loans.filter(loan => loan.max_borrowedPrincipal * allowedLiquidation * (loan.max_collateralBonus-1) * loan.max_borrowedPriceInEth / 10 ** TOKEN_LIST[loan.max_borrowedSymbol].decimals >= profit_threshold)
+  //loans = loans.filter(loan => loan.max_borrowedPrincipal * allowedLiquidation * (loan.max_collateralBonus-1) * loan.max_borrowedPriceInEth / 10 ** TOKEN_LIST[loan.max_borrowedSymbol].decimals >= profit_threshold)
   return loans;
 }
 async function liquidationProfits(loans){
@@ -155,7 +156,7 @@ async function liquidationProfit(loan){
   //minimum amount of liquidated coins that will be paid out as profit
   var flashLoanAmountInEth = flashLoanAmount * BigInt(loan.max_borrowedPriceInEth) / BigInt(10 ** TOKEN_LIST[loan.max_borrowedSymbol].decimals)
   var flashLoanAmountInEth_plusBonus = percentBigInt(flashLoanAmountInEth,loan.max_collateralBonus) //add the bonus
-  var collateralTokensFromPayout  = flashLoanAmountInEth_plusBonus * BigInt(10 ** TOKEN_LIST[loan.max_collateralSymbol].decimals) / BigInt(loan.max_collateralPriceInEth) //this is the amount of tokens that will be received as payment for liquidation and then will need to be swapped back to token of the flashloan
+  var collateralTokensFromPayout  = flashLoanAmountInEth_plusBonus * BigInt(10 ** TOKEN_LIST[loan.max_collateralSymbol].decimals) / BigInt(loan.max_collateralPriceInEth > 0 ? loan.max_collateralPriceInEth : 1e18) //this is the amount of tokens that will be received as payment for liquidation and then will need to be swapped back to token of the flashloan
   var fromTokenAmount = new TokenAmount(TOKEN_LIST[loan.max_collateralSymbol], collateralTokensFromPayout)// this is the number of coins to trade (should have many 0's)
   var bestTrade = await useTradeExactIn(fromTokenAmount, TOKEN_LIST[loan.max_collateralSymbol], TOKEN_LIST[loan.max_borrowedSymbol])
 
@@ -193,7 +194,7 @@ async function liquidationProfit(loan){
 }
 //returned value is in eth
 function gasCostToLiquidate(){
-  return BigInt(gas_cost * GAS_USED_ESTIMATE)
+  return BigInt(BigInt(GAS_PRICE) * BigInt(GAS_LIMIT_ESTIMATE))
 }
 // percent is represented as a number less than 0 ie .75 is equivalent to 75%
 // multiply base and percent and return a BigInt

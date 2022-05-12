@@ -85,7 +85,7 @@ contract LiquidateLoan is FlashLoanReceiverBase, Ownable {
 
         require(IERC20(_liquidate_asset).approve(address(_lendingPool), _amount), "Approval error");
 
-        _lendingPool.liquidationCall(_collateral,_liquidate_asset, _userToLiquidate, _amount, _receiveaToken);
+        _lendingPool.liquidationCall(_collateral,_liquidate_asset, _userToLiquidate, type(uint256).max, _receiveaToken);
     }
 
 

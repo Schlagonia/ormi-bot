@@ -9,9 +9,9 @@ import { liquidate } from './liquidation/liquidation';
 require('isomorphic-fetch');
 */
 const { fetchV2UnhealthyLoans } = require('./v2liquidation.js');
-const { getGas, gas_cost } = require('./utils/gas')
+const { getGasPrice } = require('./utils/gas')
 
-//import { getGas,gas_cost } from './utils/gas'
+//import { getGasPrice } from './utils/gas'
 //import { fetchV2UnhealthyLoans } from './v2liquidation';
 /*
 This is a place holder for implementing the liquidation call which would fully automate this bot
@@ -36,11 +36,11 @@ async function delayedFetchUnhealthyLoans(){
   //console.log (JSON.stringify(useTradeExactIn(fromTokenAmount,TOKEN_LIST["ZRX"]), null, 2))
   //fetchV2UnhealthyLoans("0xfe206f90c58feb8e42474c5074de43c22da8bc35");
   while(1==1){
-    console.log(`gas cost ${gas_cost}`)
+    //console.log(`gas cost ${gas_cost}`)
     console.log("fetching loans")
 
+    //await getGasPrice();
     fetchV2UnhealthyLoans();
-    getGas();
     await sleep(60000);
   }
   //TODO calculate liquidation threshold daily

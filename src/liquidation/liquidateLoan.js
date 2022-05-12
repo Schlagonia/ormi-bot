@@ -17,7 +17,7 @@ const liquidateALoan = async function liquidateAloan(loan, flashLoanAmount, mini
     //let wallet = new ethers.Wallet(process.env.privateKey, provider);
     
     let liquidator = new ethers.Contract(
-        aaveLiquidatorAddress,
+        ormiLiquidatorAddress,
         abi,
         signer
     )
