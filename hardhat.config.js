@@ -35,6 +35,11 @@ module.exports = {
         url: `https://speedy-nodes-nyc.moralis.io/${moralisKey}/polygon/mainnet`
       },
     },
+    ethereum :{
+      url: `https://speedy-nodes-nyc.moralis.io/${moralisKey}/eth/mainnet`,
+      chainId: 1,
+      accounts: [account]
+    },
     rinkeby: {
       url: `https://speedy-nodes-nyc.moralis.io/${moralisKey}/eth/rinkeby`,
       accounts: [account]

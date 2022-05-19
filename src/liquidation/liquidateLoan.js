@@ -12,10 +12,6 @@ const liquidateALoan = async function liquidateAloan(loan, flashLoanAmount, mini
     
     console.log("Liquidating loan for user: ", loan.user_id)
 
-    //let global = setGlobals()
-
-    //let wallet = new ethers.Wallet(process.env.privateKey, provider);
-    
     let liquidator = new ethers.Contract(
         ormiLiquidatorAddress,
         abi,
@@ -39,6 +35,8 @@ const liquidateALoan = async function liquidateAloan(loan, flashLoanAmount, mini
         gasLimit: '1000000',
         gasPrice
     }
+
+    
 
     let tx = await liquidator.connect(signer).executeFlashLoans(
         TOKEN_LIST[loan.max_borrowedSymbol].address, // _assetToLiquidate - the token address of the asset that will be liquidated

@@ -4,3 +4,5 @@
 /lib
 .env
 app.log
+artifacts
+cache

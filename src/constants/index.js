@@ -32,6 +32,8 @@ const token_list_mainnet=
   "YFI" : new Token(ChainId.MAINNET, '0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e', 18, 'YFI', 'yearn.finance'),
   "ZRX" : new Token(ChainId.MAINNET, '0xE41d2489571d322189246DaFA5ebDe1F4699F498', 18, 'ZRX', '0x'),
   "BAL" : new Token(ChainId.MAINNET, '0xba100000625a3754423978a60c9317c58a424e3D', 18, 'BAL', 'Balancer'),
+  "STETH" : new Token(ChainId.MAINNET, '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84', 18, 'STETH', "Staked Eth"),
+  "ENS" : new Token(ChainId.MAINNET, '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72', 18, 'ENS', "Eth Name Service")
 }
 const token_list_kovan =
 {
@@ -66,6 +68,6 @@ const token_list =
     [ChainId.MAINNET] : token_list_mainnet,
     [ChainId.KOVAN] : token_list_kovan,
   }
-const TOKEN_LIST = token_list_kovan  //token_list[APP_CHAIN_ID]
+const TOKEN_LIST = token_list_mainnet //token_list[APP_CHAIN_ID]
 
 module.exports = { TOKEN_LIST, ormiLiquidatorAddress, aaveLiquidatorAddress }

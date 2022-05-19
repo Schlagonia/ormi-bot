@@ -1,5 +1,9 @@
 const { ethers } = require("hardhat");
 const { networks } = require('../hardhat.config')
+const { ChainId, JSBI, Percent, Token } = require('@uniswap/sdk')
+
+const APP_CHAIN_ID = ChainId.MAINNET
+
 require('dotenv').config();
 
 const setGlobals = () => {
